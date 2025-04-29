@@ -60,4 +60,15 @@ public class Tarea {
                 "\nestado=" + estado +
                 "\n}";
     }
+
+    /**
+     * Metodo para actualizar esta instancia,
+     * copia todos los atributos excepto el id
+     * @param t instancia de Tarea a copiar
+     */
+    public void copyOf(Tarea t){
+        this.nombre = t.getNombre();
+        this.descripcion = t.getDescripcion();
+        this.estado = t.getEstado();
+    }
 }

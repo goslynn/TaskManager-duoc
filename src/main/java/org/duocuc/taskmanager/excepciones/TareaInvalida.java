@@ -1,4 +1,4 @@
-package org.duocuc.taskmanager.util;
+package org.duocuc.taskmanager.excepciones;
 
 public class TareaInvalida extends Exception {
     public TareaInvalida(String message) {

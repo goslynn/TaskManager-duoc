@@ -1,49 +1,63 @@
 package org.duocuc.taskmanager.modelo;
 
-import org.duocuc.taskmanager.util.TareaInvalida;
+
+import org.duocuc.taskmanager.excepciones.ErrorDatos;
+import org.duocuc.taskmanager.excepciones.TareaInvalida;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 public class TareaRepo implements Repositorio<Tarea>{
     private List<Tarea> tareas =  new ArrayList<>();
+    private static final Logger log = LoggerFactory.getLogger(TareaRepo.class);
 
     @Override
-    public void guardar(Tarea t) {
+    public void guardar(Tarea t) throws ErrorDatos {
         try {
             validar(t);
         } catch (TareaInvalida e) {
-            System.out.println("Error al guardar la tarea: " + e.getMessage());
-            return;
+            throw new ErrorDatos("Error al guardar la tarea", e);
         }
         tareas.add(t);
-        System.out.println("Guardando tarea: " + t.getNombre());
+        log.info("Guardando tarea: {}", t.getNombre());
     }
 
     @Override
-    public Optional<Tarea> buscarPorId(Long id) {
-        return tareas.stream()
+    public Tarea buscarPorId(Long id) throws ErrorDatos{
+        Tarea t = tareas.stream()
                      .filter(tarea -> tarea.getId().equals(id))
-                     .findFirst();
+                     .findFirst()
+                .orElse(null);
+        if (t == null){
+            throw new ErrorDatos("No se encontró la tarea con id: " + id);
+        }
+        log.info("Tarea encontrada: {}", t.getNombre());
+        return t;
     }
 
     @Override
     public List<Tarea> listar() {
+        if (tareas == null || tareas.isEmpty()) {
+            log.warn("No hay tareas registradas");
+            return new ArrayList<>();
+        }
         return tareas;
     }
 
     @Override
-    public boolean eliminar(Long id) {
-        Optional<Tarea> tarea = buscarPorId(id);
-        if (tarea.isPresent()) {
-            tareas.remove(tarea.get());
-            System.out.println("Tarea eliminada: " + tarea.get().getNombre());
-            return true;
-        } else {
-            System.out.println("Tarea no encontrada");
-            return false;
-        }
+    public void eliminar(Long id) throws ErrorDatos {
+        Tarea t = buscarPorId(id);
+        tareas.remove(t);
+        log.info("Tarea eliminada: { {}, {} }", t.getId(), t.getNombre());
+    }
+
+    @Override
+    public void actualizar(Long id, Tarea tarea) throws ErrorDatos {
+        Tarea t = buscarPorId(id);
+        t.copyOf(tarea);
     }
 
     private void validar(Tarea t) throws TareaInvalida {

@@ -4,9 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface Repositorio<T> {
-    void guardar(T objeto);
-    Optional<T> buscarPorId(Long id);
+    void guardar(T objeto) throws Exception;
+    void actualizar(Long id, T objeto) throws Exception;
+    T buscarPorId(Long id) throws Exception;
     List<T> listar();
-    boolean eliminar(Long id);
+    void eliminar(Long id) throws Exception;
 
 }

@@ -3,6 +3,7 @@ package org.duocuc.taskmanager.control;
 import org.duocuc.taskmanager.modelo.Repositorio;
 import org.duocuc.taskmanager.modelo.Tarea;
 import org.duocuc.taskmanager.modelo.TareaRepo;
+import org.duocuc.taskmanager.servicio.ServicioTareas;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,11 +12,11 @@ import java.util.List;
 @RestController
 public class ControlTareas {
 
-    private final Repositorio<Tarea> repositorio = new TareaRepo();
+    private final ServicioTareas servicio = new ServicioTareas();
 
     @GetMapping("/tarea")
     public ResponseEntity<List<Tarea>> getTareas(){
-        List<Tarea> lista = repositorio.listar();
+        List<Tarea> lista = servicio.listarTareas();
         if (lista.isEmpty()){
             return ResponseEntity.notFound().build();
         }
@@ -24,11 +25,8 @@ public class ControlTareas {
 
     @GetMapping("/tarea/{id}")
     public ResponseEntity<Tarea> getTarea(@PathVariable Long id){
-        Tarea t = repositorio.buscarPorId(id).orElse(null);
-        if (t != null){
-            return ResponseEntity.ok(t);
-        }
-        return ResponseEntity.notFound().build();
+        Tarea t = servicio.buscarPorId(id);
+        return ResponseEntity.ok(t);
     }
 
     @PostMapping("/tarea")
@@ -37,31 +35,19 @@ public class ControlTareas {
             System.out.println("no resuelve json, llega null");
             return;
         }
-        repositorio.guardar(tarea);
+        servicio.guardarTarea(tarea);
     }
 
     @PutMapping("/tarea/{id}")
     public ResponseEntity<Void> actualizarTarea(@PathVariable Long id, @RequestBody Tarea tarea){
-        Tarea memoria = repositorio.buscarPorId(id).orElse(null);
-        if (memoria == null){
-            return ResponseEntity.notFound().build();
-        }
-        memoria.setId(tarea.getId());
-        memoria.setDescripcion(tarea.getDescripcion());
-        memoria.setNombre(tarea.getNombre());
-        memoria.setEstado(tarea.getEstado());
-        System.out.println("tarea param: " + tarea);
-        System.out.println("tarea memoria: " + repositorio.buscarPorId(memoria.getId()));
+        servicio.actualizarTarea(id, tarea);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/tarea/{id}")
     public ResponseEntity<Void> eliminarTarea(@PathVariable Long id){
-        boolean b = repositorio.eliminar(id);
-        if (b){
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
+        servicio.eliminarTarea(id);
+        return ResponseEntity.ok().build();
     }
 
 
